@@ -1,0 +1,177 @@
+openapi: 3.0.0
+info:
+  version: "1.0.0"
+  title: "Payment API"
+
+paths:
+   /api/invoices:
+    post:
+      operationId: PostInvoice
+      summary: 新規請求書の作成
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostInvoiceRequest'
+      responses:
+        '200':
+          description: 請求書の作成に成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostInvoiceResponse'
+        '400':
+          description: 不正なリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      operationId: GetInvoices
+      summary: 請求書の一覧取得
+      parameters:
+        - name: fromDatetime
+          in: query
+          description: 取得する請求書の開始日時
+          required: false
+          schema:
+            type: string
+        - name: toDatetime
+          in: query
+          description: 取得する請求書の終了日時
+          required: false
+          schema:
+            type: string  
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetInvoicesResponse'
+        '400':
+          description: 不正なリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: エラー内容
+    PostInvoiceRequest:
+      type: object
+      required:
+        - paymentAmount
+        - dueAt
+        - clientId
+      properties:
+        paymentAmount:
+          type: integer
+          minimum: 1
+          description: 支払金額
+        dueAt:
+          type: string
+          description: 支払期日
+        clientId:
+          type: string
+          description: 取引先ID
+
+    PostInvoiceResponse:
+      type: object
+      required:
+        - invoiceId 
+        - companyId
+        - issueDate
+        - paymentAmount
+        - fee
+        - tax
+        - invoiceAmount
+        - dueDate
+      properties:
+        invoiceId:
+          type: string
+          discription: 請求書ID
+        companyId:
+          type: string
+          discription: 企業ID
+        issueDate:
+          type: string
+          discription: 発行日
+        paymentAmount:
+          type: integer
+          discription: 支払い金額 
+        fee:
+          type: integer
+          discription: 手数料 
+        tax: 
+          type: integer
+          discription: 税金額
+        invoiceAmount:
+          type: integer
+          discription: 請求金額
+        dueDate:
+          type: string
+          discription: 支払日
+
+    GetInvoicesResponse:
+      type: array
+      items:
+        type: object
+        required:
+          - invoiceId 
+          - companyId
+          - issueDate
+          - paymentAmount
+          - fee
+          - tax
+          - invoiceAmount
+          - dueDate
+        properties:
+          invoiceId:
+            type: string
+            discription: 請求書ID
+          companyId:
+            type: string
+            discription: 企業ID
+          issueDate:
+            type: string
+            discription: 発行日
+          paymentAmount:
+            type: integer
+            discription: 支払い金額 
+          fee:
+            type: integer
+            discription: 手数料 
+          tax: 
+            type: integer
+            discription: 税金額
+          invoiceAmount:
+            type: integer
+            discription: 請求金額
+          dueDate:
+            type: string
+            discription: 支払日
