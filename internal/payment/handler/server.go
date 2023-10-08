@@ -23,7 +23,9 @@ func (Server) PostInvoice(ctx echo.Context) error {
 	r := PostInvoiceRequest{}
 	if err := ctx.Bind(&r); err != nil {
 		ctx.Logger().Error(err)
-		return ctx.JSON(http.StatusBadRequest, ErrorRequestBinding)
+		return ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Message: ErrorRequestBinding.Error(),
+		})
 	}
 	_, err := time.Parse("2006-01-02", r.DueAt)
 	if err != nil {
