@@ -1,0 +1,4 @@
+.env
+# *.gen.*
+/air/tmp/*
+!/air/tmp/.gitkeep
