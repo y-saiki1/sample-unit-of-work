@@ -18,7 +18,7 @@ func (invoiceConverter) ToRDBModel(invoice domain.Invoice) rdb.Invoice {
 		FeeRate:       domain.FEE_RATE,
 		Tax:           invoice.Tax.Value(),
 		TaxRate:       domain.TAX_RATE,
-		TotalAmount:   invoice.InvoiceAmount.Value(),
+		InvoiceAmount: invoice.InvoiceAmount.Value(),
 		DueAt:         &due,
 	}
 }

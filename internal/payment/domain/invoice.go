@@ -14,6 +14,9 @@ type Invoice struct {
 	Tax           Tax
 	InvoiceAmount InvoiceAmount
 	DueDate       DueDate
+
+	CurrentStatus InvoiceStatus
+	StatusLogs    []InvoiceStatus
 }
 
 func NewInvoice(issueDate, dueDate time.Time, invoiceId, companyId, clientId string, payment int) (Invoice, error) {
