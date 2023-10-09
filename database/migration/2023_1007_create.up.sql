@@ -58,7 +58,7 @@ CREATE TABLE `invoices` (
     `fee_rate` decimal(5, 2) NOT NULL,
     `tax` decimal(10, 2) NOT NULL,
     `tax_rate` decimal(5, 2) NOT NULL,
-    `total_amount` decimal(10, 2) NOT NULL,
+    `invoice_amount` decimal(10, 2) NOT NULL,
     -- `status` VARCHAR(20) NOT NULL,
     `due_at` DATETIME NOT NULL,
     `created_at` DATETIME DEFAULT NULL,
@@ -69,21 +69,13 @@ CREATE TABLE `invoices` (
     FOREIGN KEY (`client_id`) REFERENCES `companies`(`company_id`)
 );
 
-CREATE TABLE `invoice_statuses` (
-    `status_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `status_name` VARCHAR(20) NOT NULL,
-    PRIMARY KEY (`status_id`),
-    UNIQUE (`status_name`)
-);
-
 CREATE TABLE `invoice_status_logs` (
     `invoice_id` VARCHAR(255) NOT NULL,
-    `status_id` INT UNSIGNED NOT NULL,
     `user_id` VARCHAR(255) NOT NULL,
+    `status` VARCHAR(20) NOT NULL,
     `created_at` DATETIME DEFAULT NULL,
     `updated_at` DATETIME DEFAULT NULL,
     `deleted_at` DATETIME DEFAULT NULL,
     FOREIGN KEY (`invoice_id`) REFERENCES `invoices`(`invoice_id`),
-    FOREIGN KEY (`status_id`) REFERENCES `invoice_statuses`(`status_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );

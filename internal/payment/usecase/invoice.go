@@ -51,7 +51,6 @@ func (u *InvoiceUseCase) Create(dto InvoiceCreateDTO) (domain.Invoice, error) {
 	issueD = time.Date(issueD.Year(), issueD.Month(), issueD.Day(), 0, 0, 0, 0, time.Local)
 	invoice, err := domain.NewInvoice(issueD, dto.DueAt, uuid.NewString(), usr.CompanyId.Value(), dto.ClientId, dto.PaymentAmount)
 	if err != nil {
-		u.logger.Error(err)
 		return domain.Invoice{}, err
 	}
 	if err := invoice.CalculateInvoiceAmount(); err != nil {

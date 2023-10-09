@@ -40,22 +40,13 @@ VALUES
     ('invoice2', 'company2', 'company3', 1500, 0.04, 60, 0.10, 6, 1566, NOW() + INTERVAL 10 DAY, NOW(), NOW()),
     ('invoice3', 'company3', 'company1', 2000, 0.04, 80, 0.10, 8, 2088, NOW() + INTERVAL 14 DAY, NOW(), NOW());
 
--- invoice_statuses
-INSERT INTO 
-    invoice_statuses (status_name) 
-VALUES 
-    ('Unprocessed'),
-    ('Processing'),
-    ('Paid'),
-    ('Error');
-
 -- invoice_status_logs
 INSERT INTO 
-    invoice_status_logs (invoice_id, status_id, user_id, created_at, updated_at) 
+    invoice_status_logs (invoice_id, user_id, status, created_at, updated_at) 
 VALUES 
-    ('invoice1', 1, 'user1', NOW(), NOW()),
-    ('invoice2', 2, 'user2', NOW(), NOW()),
-    ('invoice3', 3, 'user3', NOW(), NOW());
+    ('invoice1', 'user1', "未処理", NOW(), NOW()),
+    ('invoice2', 'user2', "未処理", NOW(), NOW()),
+    ('invoice3', 'user3', "未処理", NOW(), NOW());
 
 
 COMMIT;
