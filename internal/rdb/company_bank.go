@@ -3,8 +3,8 @@ package rdb
 import "time"
 
 type CompanyBank struct {
-	CompanyBankID string     `json:"company_bank_id"`
-	CompanyID     string     `json:"company_id"`
+	CompanyBankId string     `json:"company_bank_id"`
+	CompanyId     string     `json:"company_id"`
 	BankCode      string     `json:"bank_code"`
 	BranchCode    string     `json:"branch_code"`
 	BankName      string     `json:"bank_name"`

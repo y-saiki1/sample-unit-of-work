@@ -26,11 +26,11 @@ func (invoiceConverter) ToRDBModel(invoice domain.Invoice) rdb.Invoice {
 type userConverter struct{}
 
 func (userConverter) ToEntity(user rdb.User) (domain.User, error) {
-	uId, err := domain.NewUserId(user.UserID)
+	uId, err := domain.NewUserId(user.UserId)
 	if err != nil {
 		return domain.User{}, err
 	}
-	compId, err := domain.NewCompanyId(user.CompanyID)
+	compId, err := domain.NewCompanyId(user.CompanyId)
 	if err != nil {
 		return domain.User{}, err
 	}

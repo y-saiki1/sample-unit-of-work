@@ -50,8 +50,8 @@ func TestExecutorRDB_Append(t *testing.T) {
 			args: args{fnList: []ExecFunc{
 				func(tx *gorm.DB) error {
 					u := rdb.User{
-						UserID:    "user99990",
-						CompanyID: "company99990",
+						UserId:    "user99990",
+						CompanyId: "company99990",
 						Name:      "user99990",
 						Email:     "email1@test.com",
 						Password:  "asdasdasd",
@@ -62,8 +62,8 @@ func TestExecutorRDB_Append(t *testing.T) {
 				},
 				func(tx *gorm.DB) error {
 					u := rdb.User{
-						UserID:    "user99991",
-						CompanyID: "company99991",
+						UserId:    "user99991",
+						CompanyId: "company99991",
 						Name:      "user99991",
 						Email:     "email2@test.com",
 						Password:  "asdasdasd",
@@ -74,8 +74,8 @@ func TestExecutorRDB_Append(t *testing.T) {
 				},
 				func(tx *gorm.DB) error {
 					u := rdb.User{
-						UserID:    "user99993",
-						CompanyID: "company99993",
+						UserId:    "user99993",
+						CompanyId: "company99993",
 						Name:      "user99993",
 						Email:     "email3@test.com",
 						Password:  "asdasdasd",
@@ -115,8 +115,8 @@ func TestExecutorRDB_Exec(t *testing.T) {
 			args: args{fnList: []ExecFunc{
 				func(tx *gorm.DB) error {
 					u := rdb.User{
-						UserID:    "user99990",
-						CompanyID: "company99990",
+						UserId:    "user99990",
+						CompanyId: "company99990",
 						Name:      "user99990",
 						Email:     "email1@test.com",
 						Password:  "asdasdasd",
@@ -127,8 +127,8 @@ func TestExecutorRDB_Exec(t *testing.T) {
 				},
 				func(tx *gorm.DB) error {
 					u := rdb.User{
-						UserID:    "user99991",
-						CompanyID: "company99991",
+						UserId:    "user99991",
+						CompanyId: "company99991",
 						Name:      "user99991",
 						Email:     "email2@test.com",
 						Password:  "asdasdasd",
@@ -139,8 +139,8 @@ func TestExecutorRDB_Exec(t *testing.T) {
 				},
 				func(tx *gorm.DB) error {
 					u := rdb.User{
-						UserID:    "user99993",
-						CompanyID: "company99993",
+						UserId:    "user99993",
+						CompanyId: "company99993",
 						Name:      "user99993",
 						Email:     "email3@test.com",
 						Password:  "asdasdasd",
