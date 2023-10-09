@@ -38,18 +38,31 @@ paths:
       operationId: GetInvoices
       summary: 請求書の一覧取得
       parameters:
-        - name: fromDatetime
+        - name: dueFrom
           in: query
           description: 取得する請求書の開始日時
           required: false
           schema:
             type: string
-        - name: toDatetime
+        - name: DueTo
           in: query
           description: 取得する請求書の終了日時
           required: false
           schema:
             type: string  
+        - name: page
+          in: query
+          description: ページ
+          required: false
+          schema:
+            type: integer
+        - name: containsDeleted
+          in: query
+          description: 削除済みを含むか
+          required: false
+          schema:
+            type: boolean
+
       responses:
         '200':
           description: 成功
@@ -82,6 +95,7 @@ components:
         message:
           type: string
           description: エラー内容
+
     PostInvoiceRequest:
       type: object
       required:
@@ -138,40 +152,64 @@ components:
           discription: 支払日
 
     GetInvoicesResponse:
-      type: array
-      items:
-        type: object
-        required:
-          - invoiceId 
-          - companyId
-          - issueDate
-          - paymentAmount
-          - fee
-          - tax
-          - invoiceAmount
-          - dueDate
-        properties:
-          invoiceId:
-            type: string
-            discription: 請求書ID
-          companyId:
-            type: string
-            discription: 企業ID
-          issueDate:
-            type: string
-            discription: 発行日
-          paymentAmount:
-            type: integer
-            discription: 支払い金額 
-          fee:
-            type: integer
-            discription: 手数料 
-          tax: 
-            type: integer
-            discription: 税金額
-          invoiceAmount:
-            type: integer
-            discription: 請求金額
-          dueDate:
-            type: string
-            discription: 支払日
+      type: object
+      required:
+        - list
+      properties:
+        list: 
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceListResponse'
+      
+    InvoiceListResponse:
+      type: object
+      required:
+        - invoiceId 
+        - companyId
+        - issueDate
+        - dueDate
+        - paymentAmount
+        - fee
+        - feeRate
+        - tax
+        - taxRate
+        - invoiceAmount
+        - updatedAt
+        - deletedAt
+      properties:
+        invoiceId:
+          type: string
+          discription: 請求書ID
+        companyId:
+          type: string
+          discription: 企業ID
+        issueDate:
+          type: string
+          discription: 発行日
+        dueDate:
+          type: string
+          discription: 支払日
+        paymentAmount:
+          type: integer
+          discription: 支払い金額 
+        fee:
+          type: integer
+          discription: 手数料 
+        feeRate:
+          type: string
+          discription: 手数料%表記
+        tax: 
+          type: integer
+          discription: 税金額
+        taxRate: 
+          type: string
+          discription: 税金額%表記
+        invoiceAmount:
+          type: integer
+          discription: 請求金額
+        updatedAt:
+          type: string
+          description: 更新日時
+        deletedAt:
+          type: string
+          description: 削除日時
