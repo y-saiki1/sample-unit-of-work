@@ -10,15 +10,28 @@ type ErrorResponse struct {
 }
 
 // GetInvoicesResponse defines model for GetInvoicesResponse.
-type GetInvoicesResponse = []struct {
-	CompanyId     string `json:"companyId"`
+type GetInvoicesResponse struct {
+	List []InvoiceListResponse `json:"list"`
+}
+
+// InvoiceListResponse defines model for InvoiceListResponse.
+type InvoiceListResponse struct {
+	CompanyId string `json:"companyId"`
+
+	// DeletedAt 削除日時
+	DeletedAt     string `json:"deletedAt"`
 	DueDate       string `json:"dueDate"`
 	Fee           int    `json:"fee"`
+	FeeRate       string `json:"feeRate"`
 	InvoiceAmount int    `json:"invoiceAmount"`
 	InvoiceId     string `json:"invoiceId"`
 	IssueDate     string `json:"issueDate"`
 	PaymentAmount int    `json:"paymentAmount"`
 	Tax           int    `json:"tax"`
+	TaxRate       string `json:"taxRate"`
+
+	// UpdatedAt 更新日時
+	UpdatedAt string `json:"updatedAt"`
 }
 
 // PostInvoiceRequest defines model for PostInvoiceRequest.
@@ -47,11 +60,17 @@ type PostInvoiceResponse struct {
 
 // GetInvoicesParams defines parameters for GetInvoices.
 type GetInvoicesParams struct {
-	// FromDatetime 取得する請求書の開始日時
-	FromDatetime *string `form:"fromDatetime,omitempty" json:"fromDatetime,omitempty"`
+	// DueFrom 取得する請求書の開始日時
+	DueFrom *string `form:"dueFrom,omitempty" json:"dueFrom,omitempty"`
 
-	// ToDatetime 取得する請求書の終了日時
-	ToDatetime *string `form:"toDatetime,omitempty" json:"toDatetime,omitempty"`
+	// DueTo 取得する請求書の終了日時
+	DueTo *string `form:"DueTo,omitempty" json:"DueTo,omitempty"`
+
+	// Page ページ
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// ContainsDeleted 削除済みを含むか
+	ContainsDeleted *bool `form:"containsDeleted,omitempty" json:"containsDeleted,omitempty"`
 }
 
 // PostInvoiceJSONRequestBody defines body for PostInvoice for application/json ContentType.

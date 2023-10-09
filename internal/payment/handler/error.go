@@ -5,5 +5,7 @@ import "errors"
 var (
 	ErrorRequestBinding error = errors.New("failed to process request")
 	ErrorCreateInvoice  error = errors.New("failed to create invoice")
-	ErrorParseTime      error = errors.New("failed to parse dueAt")
+	ErrorParseDueAt     error = errors.New("failed to parse dueAt")
+	ErrorParseDueFrom   error = errors.New("failed to parse dueFrom")
+	ErrorParseDueTo     error = errors.New("failed to parse dueTo")
 )

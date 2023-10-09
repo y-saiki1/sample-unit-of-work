@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 	"upsidr-coding-test/internal/payment/infra"
 	"upsidr-coding-test/internal/payment/service"
+	"upsidr-coding-test/internal/payment/usecase/queryservice"
 
 	"upsidr-coding-test/internal/payment/usecase"
 
@@ -18,7 +20,91 @@ func NewServer() Server {
 }
 
 func (Server) GetInvoices(ctx echo.Context, params GetInvoicesParams) error {
-	return nil
+	u := ctx.Get("user").(User)
+
+	var dueFrom *time.Time
+	if params.DueFrom != nil {
+		t, err := time.Parse("2006-01-02", *params.DueFrom)
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, ErrorResponse{
+				Message: ErrorParseDueFrom.Error(),
+			})
+		}
+		dueFrom = &t
+	}
+	var dueTo *time.Time
+	if params.DueTo != nil {
+		t, err := time.Parse("2006-01-02", *params.DueTo)
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, ErrorResponse{
+				Message: ErrorParseDueTo.Error(),
+			})
+		}
+		dueTo = &t
+	}
+	var page int
+	if params.Page != nil {
+		page = *params.Page
+	}
+	var containsDeleted bool
+	if params.ContainsDeleted != nil {
+		containsDeleted = *params.ContainsDeleted
+	}
+
+	invQuery := infra.NewInvoiceRDBQuery()
+	userRepo := infra.NewUserRDB()
+	service := queryservice.NewInvoiceQueryService(ctx.Logger(), &invQuery, &userRepo)
+	list, err := service.List(queryservice.InvoiceListDTO{
+		UserId:          u.UserId,
+		DueFrom:         dueFrom,
+		DueTo:           dueTo,
+		Page:            page,
+		ContainsDeleted: containsDeleted,
+	})
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	res := make([]InvoiceListResponse, 0, len(list))
+	for _, val := range list {
+		var dueDate string
+		if val.DueDate != nil {
+			dueDate = val.DueDate.Format("2006-01-02")
+		}
+		var issueDate string
+		if val.IssueDate != nil {
+			issueDate = val.IssueDate.Format("2006-01-02")
+		}
+		var updatedAt string
+		if val.UpdatedAt != nil {
+			updatedAt = val.UpdatedAt.Format("2006-01-02")
+		}
+		var deletedAt string
+		if val.DeletedAt != nil {
+			deletedAt = val.DeletedAt.Format("2006-01-02")
+		}
+
+		res = append(res, InvoiceListResponse{
+			CompanyId:     val.CompanyId,
+			DueDate:       dueDate,
+			PaymentAmount: int(val.PaymentAmount),
+			Fee:           int(val.Fee),
+			FeeRate:       fmt.Sprintf("%d%%", int(val.FeeRate*100)),
+			Tax:           int(val.Tax),
+			TaxRate:       fmt.Sprintf("%d%%", int(val.TaxRate*100)),
+			InvoiceAmount: int(val.InvoiceAmount),
+			InvoiceId:     val.InvoiceId,
+			IssueDate:     issueDate,
+			UpdatedAt:     updatedAt,
+			DeletedAt:     deletedAt,
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, GetInvoicesResponse{
+		List: res,
+	})
 }
 
 func (Server) PostInvoice(ctx echo.Context) error {
@@ -34,7 +120,7 @@ func (Server) PostInvoice(ctx echo.Context) error {
 	dueAt, err := time.Parse("2006-01-02", r.DueAt)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{
-			Message: ErrorParseTime.Error(),
+			Message: ErrorParseDueAt.Error(),
 		})
 	}
 

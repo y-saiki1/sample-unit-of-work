@@ -32,18 +32,32 @@ func (w *ServerInterfaceWrapper) GetInvoices(ctx echo.Context) error {
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetInvoicesParams
-	// ------------- Optional query parameter "fromDatetime" -------------
+	// ------------- Optional query parameter "dueFrom" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "fromDatetime", ctx.QueryParams(), &params.FromDatetime)
+	err = runtime.BindQueryParameter("form", true, false, "dueFrom", ctx.QueryParams(), &params.DueFrom)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter fromDatetime: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter dueFrom: %s", err))
 	}
 
-	// ------------- Optional query parameter "toDatetime" -------------
+	// ------------- Optional query parameter "DueTo" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "toDatetime", ctx.QueryParams(), &params.ToDatetime)
+	err = runtime.BindQueryParameter("form", true, false, "DueTo", ctx.QueryParams(), &params.DueTo)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter toDatetime: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter DueTo: %s", err))
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "containsDeleted" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "containsDeleted", ctx.QueryParams(), &params.ContainsDeleted)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter containsDeleted: %s", err))
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
