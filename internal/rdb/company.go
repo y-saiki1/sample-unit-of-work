@@ -3,7 +3,7 @@ package rdb
 import "time"
 
 type Company struct {
-	CompanyId          string     `json:"company_id"`
+	CompanyId          string     `json:"company_id" gorm:"primaryKey"`
 	Name               string     `json:"name"`
 	RepresentativeName string     `json:"representative_name"`
 	PhoneNumber        string     `json:"phone_number"`
