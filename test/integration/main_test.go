@@ -40,7 +40,7 @@ func setUp() {
 	e.Use(middleware.Recover())
 
 	if err := rdb.Init(
-		false,
+		true,
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASS"),
 		os.Getenv("DB_HOST"),
