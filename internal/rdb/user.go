@@ -3,8 +3,8 @@ package rdb
 import "time"
 
 type User struct {
-	UserID    string     `json:"user_id"`
-	CompanyID string     `json:"company_id"`
+	UserId    string     `json:"user_id"`
+	CompanyId string     `json:"company_id"`
 	Name      string     `json:"name"`
 	Email     string     `json:"email"`
 	Password  string     `json:"password"`
