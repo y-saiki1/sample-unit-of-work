@@ -14,3 +14,6 @@ dbclear-%:
 	docker compose exec -T rdb mysql -u$(shell cat ./database/conf/${@:dbclear-%=%}.json | jq -r .user) -p$(shell cat ./database/conf/${@:dbclear-%=%}.json | jq -r .password) -e "CREATE DATABASE $(shell cat ./database/conf/${@:dbclear-%=%}.json | jq -r .database);"
 	docker compose exec -T rdb mysql -u$(shell cat ./database/conf/${@:dbclear-%=%}.json | jq -r .user) -p$(shell cat ./database/conf/${@:dbclear-%=%}.json | jq -r .password) -e "DROP DATABASE $(shell cat ./database/conf/${@:dbclear-%=%}.json | jq -r .database)_test;"
 	docker compose exec -T rdb mysql -u$(shell cat ./database/conf/${@:dbclear-%=%}.json | jq -r .user) -p$(shell cat ./database/conf/${@:dbclear-%=%}.json | jq -r .password) -e "CREATE DATABASE $(shell cat ./database/conf/${@:dbclear-%=%}.json | jq -r .database)_test;"
+
+exec-test:
+	docker compose exec payment go test ./...

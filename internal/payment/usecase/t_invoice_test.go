@@ -50,10 +50,12 @@ func TestInvoiceUseCase_Create(t *testing.T) {
 				executor *imock.MockExecutor,
 			) {
 				comId, _ := domain.NewCompanyId("company1")
+				uId, _ := domain.NewUserId("user1")
+				uName, _ := domain.NewUserName("user")
 				logger.On("Error", mock.Anything).Return()
 				invoiceRepo.On("Store", mock.AnythingOfType("domain.Invoice")).Return(nil)
 				companyRepo.On("IsClientOfCompany", mock.AnythingOfType("domain.CompanyId"), mock.AnythingOfType("domain.ClientId")).Return(true, nil)
-				userRepo.On("FindByUserId", mock.AnythingOfType("domain.UserId")).Return(domain.User{CompanyId: comId}, nil)
+				userRepo.On("FindByUserId", mock.AnythingOfType("domain.UserId")).Return(domain.User{UserId: uId, Name: uName, CompanyId: comId}, nil)
 				executor.On("Exec").Return(nil)
 			},
 			want: func() domain.Invoice {
@@ -94,10 +96,12 @@ func TestInvoiceUseCase_Create(t *testing.T) {
 				executor *imock.MockExecutor,
 			) {
 				comId, _ := domain.NewCompanyId("company1")
+				uId, _ := domain.NewUserId("user1")
+				uName, _ := domain.NewUserName("user")
 				logger.On("Error", mock.Anything).Return()
 				invoiceRepo.On("Store", mock.AnythingOfType("domain.Invoice")).Return(nil)
 				companyRepo.On("IsClientOfCompany", mock.AnythingOfType("domain.CompanyId"), mock.AnythingOfType("domain.ClientId")).Return(true, nil)
-				userRepo.On("FindByUserId", mock.AnythingOfType("domain.UserId")).Return(domain.User{CompanyId: comId}, nil)
+				userRepo.On("FindByUserId", mock.AnythingOfType("domain.UserId")).Return(domain.User{UserId: uId, Name: uName, CompanyId: comId}, nil)
 				executor.On("Exec").Return(nil)
 			},
 			want: func() domain.Invoice {
@@ -123,10 +127,12 @@ func TestInvoiceUseCase_Create(t *testing.T) {
 				executor *imock.MockExecutor,
 			) {
 				comId, _ := domain.NewCompanyId("company1")
+				uId, _ := domain.NewUserId("user1")
+				uName, _ := domain.NewUserName("user")
 				logger.On("Error", mock.Anything).Return()
 				invoiceRepo.On("Store", mock.AnythingOfType("domain.Invoice")).Return(nil)
 				companyRepo.On("IsClientOfCompany", mock.AnythingOfType("domain.CompanyId"), mock.AnythingOfType("domain.ClientId")).Return(true, nil)
-				userRepo.On("FindByUserId", mock.AnythingOfType("domain.UserId")).Return(domain.User{CompanyId: comId}, nil)
+				userRepo.On("FindByUserId", mock.AnythingOfType("domain.UserId")).Return(domain.User{UserId: uId, Name: uName, CompanyId: comId}, nil)
 				executor.On("Exec").Return(nil)
 			},
 			want: func() domain.Invoice {
@@ -152,10 +158,12 @@ func TestInvoiceUseCase_Create(t *testing.T) {
 				executor *imock.MockExecutor,
 			) {
 				comId, _ := domain.NewCompanyId("company1")
+				uId, _ := domain.NewUserId("user1")
+				uName, _ := domain.NewUserName("user")
 				logger.On("Error", mock.Anything).Return()
 				invoiceRepo.On("Store", mock.AnythingOfType("domain.Invoice")).Return(nil)
 				companyRepo.On("IsClientOfCompany", mock.AnythingOfType("domain.CompanyId"), mock.AnythingOfType("domain.ClientId")).Return(true, nil)
-				userRepo.On("FindByUserId", mock.AnythingOfType("domain.UserId")).Return(domain.User{CompanyId: comId}, nil)
+				userRepo.On("FindByUserId", mock.AnythingOfType("domain.UserId")).Return(domain.User{UserId: uId, Name: uName, CompanyId: comId}, nil)
 				executor.On("Exec").Return(nil)
 			},
 			want: func() domain.Invoice {
@@ -181,10 +189,12 @@ func TestInvoiceUseCase_Create(t *testing.T) {
 				executor *imock.MockExecutor,
 			) {
 				comId, _ := domain.NewCompanyId("company1")
+				uId, _ := domain.NewUserId("user1")
+				uName, _ := domain.NewUserName("user")
 				logger.On("Error", mock.Anything).Return()
 				invoiceRepo.On("Store", mock.AnythingOfType("domain.Invoice")).Return(nil)
 				companyRepo.On("IsClientOfCompany", mock.AnythingOfType("domain.CompanyId"), mock.AnythingOfType("domain.ClientId")).Return(true, nil)
-				userRepo.On("FindByUserId", mock.AnythingOfType("domain.UserId")).Return(domain.User{CompanyId: comId}, nil)
+				userRepo.On("FindByUserId", mock.AnythingOfType("domain.UserId")).Return(domain.User{UserId: uId, Name: uName, CompanyId: comId}, nil)
 				executor.On("Exec").Return(nil)
 			},
 			want: func() domain.Invoice {
