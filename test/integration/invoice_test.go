@@ -89,7 +89,8 @@ func setUpGetInvoices(t *testing.T) InvoiceTestSeeder {
 		tax := fee * domain.TAX_RATE
 		invAmount := val + fee + tax
 		dueAt := dueAts[i]
-		inv := newInvoice(t, uuid.NewString(), companies[0].CompanyId, companies[idx].CompanyId, val, fee, domain.FEE_RATE, tax, domain.TAX_RATE, invAmount, dueAt)
+		inv := newInvoice(t, uuid.NewString(), companies[0].CompanyId, users[0].UserId, companies[idx].CompanyId, val, fee, domain.FEE_RATE, tax, domain.TAX_RATE, invAmount, dueAt)
+		inv.Client = &companies[idx]
 		invoices = append(invoices, inv)
 		invoiceMP[fmt.Sprintf("invoice%d", idx)] = inv
 	}
@@ -127,7 +128,7 @@ func setUpGetInvoices(t *testing.T) InvoiceTestSeeder {
 	if err := rdb.DB.Create(&clients).Error; err != nil {
 		e.Logger.Fatal(err)
 	}
-	if err := rdb.DB.Create(&invoices).Error; err != nil {
+	if err := rdb.DB.Debug().Create(&invoices).Error; err != nil {
 		e.Logger.Fatal(err)
 	}
 	return seeder
@@ -254,6 +255,17 @@ func TestGetInvoices(t *testing.T) {
 						InvoiceAmount: int(invoice.InvoiceAmount),
 						UpdatedAt:     invoice.UpdatedAt.Format("2006-01-02"),
 						DeletedAt:     "",
+
+						Client: handler.Client{
+							CompanyId: invoice.Client.CompanyId,
+							Name:      invoice.Client.Name,
+						},
+						StatusLogs: []handler.StatusLog{{
+							Status:    string(domain.INVOICE_STATUS_PENDING),
+							UserName:  seed.users["user1"].Name,
+							CreatedAt: invoice.CreatedAt.Format("2006-01-02"),
+							UpdatedAt: invoice.UpdatedAt.Format("2006-01-02"),
+						}},
 					})
 				}
 				return handler.GetInvoicesResponse{List: responses}
@@ -284,6 +296,17 @@ func TestGetInvoices(t *testing.T) {
 						InvoiceAmount: int(invoice.InvoiceAmount),
 						UpdatedAt:     invoice.UpdatedAt.Format("2006-01-02"),
 						DeletedAt:     "",
+
+						Client: handler.Client{
+							CompanyId: invoice.Client.CompanyId,
+							Name:      invoice.Client.Name,
+						},
+						StatusLogs: []handler.StatusLog{{
+							Status:    string(domain.INVOICE_STATUS_PENDING),
+							UserName:  seed.users["user1"].Name,
+							CreatedAt: invoice.CreatedAt.Format("2006-01-02"),
+							UpdatedAt: invoice.UpdatedAt.Format("2006-01-02"),
+						}},
 					})
 				}
 
@@ -315,6 +338,17 @@ func TestGetInvoices(t *testing.T) {
 						InvoiceAmount: int(invoice.InvoiceAmount),
 						UpdatedAt:     invoice.UpdatedAt.Format("2006-01-02"),
 						DeletedAt:     "",
+
+						Client: handler.Client{
+							CompanyId: invoice.Client.CompanyId,
+							Name:      invoice.Client.Name,
+						},
+						StatusLogs: []handler.StatusLog{{
+							Status:    string(domain.INVOICE_STATUS_PENDING),
+							UserName:  seed.users["user1"].Name,
+							CreatedAt: invoice.CreatedAt.Format("2006-01-02"),
+							UpdatedAt: invoice.UpdatedAt.Format("2006-01-02"),
+						}},
 					})
 				}
 
@@ -348,6 +382,17 @@ func TestGetInvoices(t *testing.T) {
 						InvoiceAmount: int(invoice.InvoiceAmount),
 						UpdatedAt:     invoice.UpdatedAt.Format("2006-01-02"),
 						DeletedAt:     "",
+
+						Client: handler.Client{
+							CompanyId: invoice.Client.CompanyId,
+							Name:      invoice.Client.Name,
+						},
+						StatusLogs: []handler.StatusLog{{
+							Status:    string(domain.INVOICE_STATUS_PENDING),
+							UserName:  seed.users["user1"].Name,
+							CreatedAt: invoice.CreatedAt.Format("2006-01-02"),
+							UpdatedAt: invoice.UpdatedAt.Format("2006-01-02"),
+						}},
 					})
 				}
 

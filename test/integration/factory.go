@@ -3,6 +3,7 @@ package integration
 import (
 	"testing"
 	"time"
+	"upsidr-coding-test/internal/payment/domain"
 	"upsidr-coding-test/internal/rdb"
 )
 
@@ -53,7 +54,7 @@ func newClient(t *testing.T, companyId, clientId string) rdb.Client {
 	}
 }
 
-func newInvoice(t *testing.T, invoiceId, companyId, clientId string, paymentAmount, fee, feeRate, tax, taxRate, invoiceAmount float64, dueAt time.Time) rdb.Invoice {
+func newInvoice(t *testing.T, invoiceId, companyId, userId, clientId string, paymentAmount, fee, feeRate, tax, taxRate, invoiceAmount float64, dueAt time.Time) rdb.Invoice {
 	now := time.Now()
 	return rdb.Invoice{
 		InvoiceId:     invoiceId,
@@ -69,5 +70,13 @@ func newInvoice(t *testing.T, invoiceId, companyId, clientId string, paymentAmou
 		CreatedAt:     &now,
 		UpdatedAt:     &now,
 		DeletedAt:     nil,
+
+		StatusLogs: []rdb.InvoiceStatusLog{{
+			InvoiceId: invoiceId,
+			UserId:    userId,
+			Status:    string(domain.INVOICE_STATUS_PENDING),
+			CreatedAt: &now,
+			UpdatedAt: &now,
+		}},
 	}
 }

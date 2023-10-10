@@ -28,6 +28,7 @@ CREATE TABLE `users` (
 CREATE TABLE `clients` (
     `company_id` VARCHAR(255) NOT NULL,
     `client_id` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`company_id`, `client_id`),
     FOREIGN KEY (`company_id`) REFERENCES `companies`(`company_id`),
     FOREIGN KEY (`client_id`) REFERENCES `companies`(`company_id`)
 );
@@ -76,6 +77,7 @@ CREATE TABLE `invoice_status_logs` (
     `created_at` DATETIME DEFAULT NULL,
     `updated_at` DATETIME DEFAULT NULL,
     `deleted_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`invoice_id`, `status`),
     FOREIGN KEY (`invoice_id`) REFERENCES `invoices`(`invoice_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );

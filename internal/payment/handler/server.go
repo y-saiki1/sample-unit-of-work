@@ -86,6 +86,29 @@ func (Server) GetInvoices(ctx echo.Context, params GetInvoicesParams) error {
 			deletedAt = val.DeletedAt.Format("2006-01-02")
 		}
 
+		logs := make([]StatusLog, 0, len(val.StatusLogs))
+		for _, log := range val.StatusLogs {
+			var createdAt string
+			if log.CreatedAt != nil {
+				createdAt = log.CreatedAt.Format("2006-01-02")
+			}
+			var updatedAt string
+			if log.UpdatedAt != nil {
+				updatedAt = log.UpdatedAt.Format("2006-01-02")
+			}
+			var deletedAt string
+			if log.DeletedAt != nil {
+				deletedAt = log.DeletedAt.Format("2006-01-02")
+			}
+			logs = append(logs, StatusLog{
+				Status:    log.Status,
+				UserName:  log.UserName,
+				CreatedAt: createdAt,
+				UpdatedAt: updatedAt,
+				DeletedAt: deletedAt,
+			})
+		}
+
 		res = append(res, InvoiceListResponse{
 			CompanyId:     val.CompanyId,
 			DueDate:       dueDate,
@@ -99,6 +122,11 @@ func (Server) GetInvoices(ctx echo.Context, params GetInvoicesParams) error {
 			IssueDate:     issueDate,
 			UpdatedAt:     updatedAt,
 			DeletedAt:     deletedAt,
+			Client: Client{
+				CompanyId: val.Client.CompanyId,
+				Name:      val.Client.Name,
+			},
+			StatusLogs: logs,
 		})
 	}
 

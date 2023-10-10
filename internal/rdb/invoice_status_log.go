@@ -10,5 +10,5 @@ type InvoiceStatusLog struct {
 	UpdatedAt *time.Time `json:"updated_at"`
 	DeletedAt *time.Time `json:"deleted_at"`
 
-	User *User `json:"user" gorm:"foreignKey:UserId"`
+	User *User `json:"user" gorm:"foreignKey:UserId;references:UserId"`
 }

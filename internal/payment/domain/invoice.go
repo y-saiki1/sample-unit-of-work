@@ -2,8 +2,6 @@ package domain
 
 import (
 	"time"
-
-	"github.com/k0kubun/pp"
 )
 
 type Invoice struct {
@@ -48,7 +46,6 @@ func NewInvoice(issueDate, dueDate time.Time, invoiceId, companyId, userId, user
 		return Invoice{}, err
 	}
 	statusLog, err := NewInvoiceStatusLog(userId, userName, INVOICE_STATUS_PENDING)
-	pp.Println(statusLog, err)
 	if err != nil {
 		return Invoice{}, err
 	}
