@@ -2,6 +2,8 @@ package domain
 
 import (
 	"time"
+
+	"github.com/k0kubun/pp"
 )
 
 type Invoice struct {
@@ -15,11 +17,11 @@ type Invoice struct {
 	InvoiceAmount InvoiceAmount
 	DueDate       DueDate
 
-	CurrentStatus InvoiceStatus
-	StatusLogs    []InvoiceStatus
+	CurrentStatus InvoiceStatusLog
+	StatusLogs    []InvoiceStatusLog
 }
 
-func NewInvoice(issueDate, dueDate time.Time, invoiceId, companyId, clientId string, payment int) (Invoice, error) {
+func NewInvoice(issueDate, dueDate time.Time, invoiceId, companyId, userId, userName, clientId string, payment int) (Invoice, error) {
 	invId, err := NewInvoiceId(invoiceId)
 	if err != nil {
 		return Invoice{}, err
@@ -45,6 +47,11 @@ func NewInvoice(issueDate, dueDate time.Time, invoiceId, companyId, clientId str
 	if err != nil {
 		return Invoice{}, err
 	}
+	statusLog, err := NewInvoiceStatusLog(userId, userName, INVOICE_STATUS_PENDING)
+	pp.Println(statusLog, err)
+	if err != nil {
+		return Invoice{}, err
+	}
 
 	return Invoice{
 		InvoiceId:     invId,
@@ -53,6 +60,8 @@ func NewInvoice(issueDate, dueDate time.Time, invoiceId, companyId, clientId str
 		IssueDate:     issDate,
 		DueDate:       dDate,
 		PaymentAmount: pAmount,
+		CurrentStatus: statusLog,
+		StatusLogs:    []InvoiceStatusLog{statusLog},
 	}, nil
 }
 

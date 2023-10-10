@@ -19,6 +19,8 @@ func TestNewInvoice(t *testing.T) {
 		companyId string
 		clientId  string
 		payment   int
+		userId    string
+		userName  string
 	}
 	tests := []struct {
 		name    string
@@ -35,6 +37,8 @@ func TestNewInvoice(t *testing.T) {
 				companyId: "company1",
 				clientId:  "client1",
 				payment:   int(paymentAmount),
+				userId:    "user1",
+				userName:  "test",
 			},
 			want: Invoice{
 				InvoiceId:     InvoiceId{"invoice1"},
@@ -43,6 +47,8 @@ func TestNewInvoice(t *testing.T) {
 				IssueDate:     IssueDate{issueDate},
 				PaymentAmount: PaymentAmount{paymentAmount},
 				DueDate:       DueDate{dueDate},
+				CurrentStatus: InvoiceStatusLog{Status: INVOICE_STATUS_PENDING, UserId: UserId{"user1"}, UserName: UserName{"test"}},
+				StatusLogs:    []InvoiceStatusLog{{Status: INVOICE_STATUS_PENDING, UserId: UserId{"user1"}, UserName: UserName{"test"}}},
 			},
 			wantErr: nil,
 		},
@@ -55,6 +61,8 @@ func TestNewInvoice(t *testing.T) {
 				companyId: "company1",
 				clientId:  "client1",
 				payment:   -int(paymentAmount),
+				userId:    "user1",
+				userName:  "test",
 			},
 			want:    Invoice{},
 			wantErr: ErrorInvalidPaymentAmount,
@@ -68,6 +76,8 @@ func TestNewInvoice(t *testing.T) {
 				companyId: "company1",
 				clientId:  "client1",
 				payment:   int(paymentAmount),
+				userId:    "user1",
+				userName:  "test",
 			},
 			want:    Invoice{},
 			wantErr: ErrorInvoiceIdEmpty,
@@ -81,6 +91,8 @@ func TestNewInvoice(t *testing.T) {
 				companyId: "",
 				clientId:  "client1",
 				payment:   int(paymentAmount),
+				userId:    "user1",
+				userName:  "test",
 			},
 			want:    Invoice{},
 			wantErr: ErrorCompanyIdEmpty,
@@ -94,6 +106,8 @@ func TestNewInvoice(t *testing.T) {
 				companyId: "company1",
 				clientId:  "",
 				payment:   int(paymentAmount),
+				userId:    "user1",
+				userName:  "test",
 			},
 			want:    Invoice{},
 			wantErr: ErrorClientIdEmpty,
@@ -107,6 +121,8 @@ func TestNewInvoice(t *testing.T) {
 				companyId: "company1",
 				clientId:  "client1",
 				payment:   int(paymentAmount),
+				userId:    "user1",
+				userName:  "test",
 			},
 			want: Invoice{
 				InvoiceId:     InvoiceId{"invoice1"},
@@ -114,10 +130,9 @@ func TestNewInvoice(t *testing.T) {
 				ClientId:      ClientId{"client1"},
 				IssueDate:     IssueDate{issueDate},
 				PaymentAmount: PaymentAmount{paymentAmount},
-				// Fee:           Fee{fee},
-				// Tax:           Tax{tax},
-				// InvoiceAmount: InvoiceAmount{invoiceAmount},
-				DueDate: DueDate{dueDate},
+				DueDate:       DueDate{dueDate},
+				CurrentStatus: InvoiceStatusLog{Status: INVOICE_STATUS_PENDING, UserId: UserId{"user1"}, UserName: UserName{"test"}},
+				StatusLogs:    []InvoiceStatusLog{{Status: INVOICE_STATUS_PENDING, UserId: UserId{"user1"}, UserName: UserName{"test"}}},
 			},
 			wantErr: nil,
 		},
@@ -130,6 +145,8 @@ func TestNewInvoice(t *testing.T) {
 				companyId: "company1",
 				clientId:  "client1",
 				payment:   int(paymentAmount),
+				userId:    "user1",
+				userName:  "test",
 			},
 			want:    Invoice{},
 			wantErr: ErrorIssueDateInvalid,
@@ -140,7 +157,7 @@ func TestNewInvoice(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			invoice, err := NewInvoice(tt.args.issueDate, tt.args.dueDate, tt.args.invoiceId, tt.args.companyId, tt.args.clientId, tt.args.payment)
+			invoice, err := NewInvoice(tt.args.issueDate, tt.args.dueDate, tt.args.invoiceId, tt.args.companyId, tt.args.userId, tt.args.userName, tt.args.clientId, tt.args.payment)
 			assert.Equal(t, tt.want, invoice)
 			assert.Equal(t, tt.wantErr, err)
 		})
@@ -166,7 +183,7 @@ func TestInvoice_CalculateInvoiceAmount(t *testing.T) {
 		{
 			name: "正常な計算",
 			invoice: func() Invoice {
-				i, _ := NewInvoice(issueDate, dueDate, "invoice1", "company1", "client1", int(paymentAmount))
+				i, _ := NewInvoice(issueDate, dueDate, "invoice1", "company1", "user1", "test", "client1", int(paymentAmount))
 				return i
 			}(),
 			wantInvoiceAmt: InvoiceAmount{value: invoiceAmount},

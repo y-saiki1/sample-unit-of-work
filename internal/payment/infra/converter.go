@@ -9,6 +9,14 @@ type invoiceConverter struct{}
 
 func (invoiceConverter) ToRDBModel(invoice domain.Invoice) rdb.Invoice {
 	due := invoice.DueDate.Value()
+	logs := make([]rdb.InvoiceStatusLog, 0, len(invoice.StatusLogs))
+	for _, log := range invoice.StatusLogs {
+		logs = append(logs, rdb.InvoiceStatusLog{
+			InvoiceId: invoice.InvoiceId.Value(),
+			UserId:    log.UserId.Value(),
+			Status:    log.Status.Value(),
+		})
+	}
 	return rdb.Invoice{
 		InvoiceId:     invoice.InvoiceId.Value(),
 		CompanyId:     invoice.CompanyId.Value(),
@@ -20,6 +28,8 @@ func (invoiceConverter) ToRDBModel(invoice domain.Invoice) rdb.Invoice {
 		TaxRate:       domain.TAX_RATE,
 		InvoiceAmount: invoice.InvoiceAmount.Value(),
 		DueAt:         &due,
+
+		StatusLogs: logs,
 	}
 }
 
@@ -35,8 +45,14 @@ func (userConverter) ToEntity(user rdb.User) (domain.User, error) {
 		return domain.User{}, err
 	}
 
+	uName, err := domain.NewUserName(user.Name)
+	if err != nil {
+		return domain.User{}, err
+	}
+
 	return domain.User{
 		UserId:    uId,
 		CompanyId: compId,
+		Name:      uName,
 	}, nil
 }
