@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"testing"
 	"time"
+	"upsidr-coding-test/internal/auth"
 	"upsidr-coding-test/internal/payment/domain"
 	"upsidr-coding-test/internal/payment/handler"
 	"upsidr-coding-test/internal/payment/service"
@@ -24,11 +25,19 @@ type InvoiceTestSeeder struct {
 	invoices  map[string]rdb.Invoice
 }
 
+func hashed(rawPass string) string {
+	h, err := hashPassword(rawPass)
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+	return h
+}
+
 func setUpPostInvoice(t *testing.T) InvoiceTestSeeder {
 	company1 := newCompany(t, uuid.NewString(), "test_company1", "test1", "09000000001", "0000001", "test_address")
 	company2 := newCompany(t, uuid.NewString(), "test_company2", "test2", "09000000002", "0000002", "test_address")
 	company3 := newCompany(t, uuid.NewString(), "test_company3", "test3", "09000000003", "0000003", "test_address")
-	user1 := newUser(t, uuid.NewString(), company1.CompanyId, "test_user1", fmt.Sprintf("%s@test.com", uuid.NewString()), "password")
+	user1 := newUser(t, uuid.NewString(), company1.CompanyId, "test_user1", fmt.Sprintf("%s@test.com", uuid.NewString()), hashed("password"))
 	client1 := newClient(t, company1.CompanyId, company2.CompanyId)
 
 	seeder := InvoiceTestSeeder{
@@ -66,10 +75,10 @@ func setUpGetInvoices(t *testing.T) InvoiceTestSeeder {
 		newCompany(t, uuid.NewString(), "test_company6", "test6", "09000000006", "0000006", "test_address"),
 	}
 	users := []rdb.User{
-		newUser(t, uuid.NewString(), companies[0].CompanyId, "test_user1", fmt.Sprintf("%s@test.com", uuid.NewString()), "password"),
-		newUser(t, uuid.NewString(), companies[1].CompanyId, "test_user2", fmt.Sprintf("%s@test.com", uuid.NewString()), "password"),
-		newUser(t, uuid.NewString(), companies[2].CompanyId, "test_user3", fmt.Sprintf("%s@test.com", uuid.NewString()), "password"),
-		newUser(t, uuid.NewString(), companies[3].CompanyId, "test_user4", fmt.Sprintf("%s@test.com", uuid.NewString()), "password"),
+		newUser(t, uuid.NewString(), companies[0].CompanyId, hashed("test_user1"), fmt.Sprintf("%s@test.com", uuid.NewString()), "password"),
+		newUser(t, uuid.NewString(), companies[1].CompanyId, hashed("test_user2"), fmt.Sprintf("%s@test.com", uuid.NewString()), "password"),
+		newUser(t, uuid.NewString(), companies[2].CompanyId, hashed("test_user3"), fmt.Sprintf("%s@test.com", uuid.NewString()), "password"),
+		newUser(t, uuid.NewString(), companies[3].CompanyId, hashed("test_user4"), fmt.Sprintf("%s@test.com", uuid.NewString()), "password"),
 	}
 	clients := []rdb.Client{
 		newClient(t, companies[0].CompanyId, companies[1].CompanyId),
@@ -136,15 +145,18 @@ func setUpGetInvoices(t *testing.T) InvoiceTestSeeder {
 
 func TestPostInvoice(t *testing.T) {
 	seed := setUpPostInvoice(t)
+	tk, _ := getToken(seed.users["user1"].UserId)
 	tests := []struct {
 		name     string
+		token    string
 		req      handler.PostInvoiceRequest
 		want     handler.PostInvoiceResponse
 		wantErr  handler.ErrorResponse
 		wantCode int
 	}{
 		{
-			name: "正常にリクエストを送った場合",
+			name:  "正常にリクエストを送った場合",
+			token: tk,
 			req: handler.PostInvoiceRequest{
 				ClientId:      seed.companies["company2"].CompanyId,
 				DueAt:         time.Now().AddDate(0, 1, 0).Format("2006-01-02"),
@@ -161,7 +173,8 @@ func TestPostInvoice(t *testing.T) {
 			},
 		},
 		{
-			name: "支払い期日が過去の日付の場合",
+			name:  "支払い期日が過去の日付の場合",
+			token: tk,
 			req: handler.PostInvoiceRequest{
 				ClientId:      seed.companies["company2"].CompanyId,
 				DueAt:         time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
@@ -172,7 +185,8 @@ func TestPostInvoice(t *testing.T) {
 			},
 		},
 		{
-			name: "支払い金額が負の整数だった場合",
+			name:  "支払い金額が負の整数だった場合",
+			token: tk,
 			req: handler.PostInvoiceRequest{
 				ClientId:      seed.companies["company2"].CompanyId,
 				DueAt:         time.Now().AddDate(0, 1, 0).Format("2006-01-02"),
@@ -183,7 +197,8 @@ func TestPostInvoice(t *testing.T) {
 			},
 		},
 		{
-			name: "請求対象がクライアント関係になかった場合",
+			name:  "請求対象がクライアント関係になかった場合",
+			token: tk,
 			req: handler.PostInvoiceRequest{
 				ClientId:      seed.companies["company3"].CompanyId,
 				DueAt:         time.Now().AddDate(0, 1, 0).Format("2006-01-02"),
@@ -193,6 +208,18 @@ func TestPostInvoice(t *testing.T) {
 				Message: service.ErrorClientNotRelatedWithCompany.Error(),
 			},
 		},
+		{
+			name:  "トークンが無効な場合",
+			token: "abcdefg",
+			req: handler.PostInvoiceRequest{
+				ClientId:      seed.companies["company2"].CompanyId,
+				DueAt:         time.Now().AddDate(0, 1, 0).Format("2006-01-02"),
+				PaymentAmount: 10000,
+			},
+			wantErr: handler.ErrorResponse{
+				Message: auth.ErrorTokenVerification.Error(),
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -200,28 +227,34 @@ func TestPostInvoice(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			usr := handler.User{UserId: seed.users["user1"].UserId}
-			ctx, server, recoder := initServer("/api/invoices", tt.req, usr)
-			_ = server.PostInvoice(ctx)
+			body, statusCode, err := postRequest("/api/invoices", "POST", tt.req, tt.token)
+			assert.Equal(t, nil, err)
 
-			switch recoder.Code {
+			switch statusCode {
 			case http.StatusOK:
 				res := handler.PostInvoiceResponse{}
-				err := json.NewDecoder(recoder.Body).Decode(&res)
-
+				err := json.Unmarshal(body, &res)
 				assert.Equal(t, nil, err)
-				assert.Equal(t, http.StatusOK, recoder.Code)
+				assert.Equal(t, http.StatusOK, statusCode)
 				opts := cmpopts.IgnoreFields(handler.PostInvoiceResponse{}, "InvoiceId")
 				assert.Empty(t, cmp.Diff(tt.want, res, opts), "different:")
 
 			case http.StatusInternalServerError:
 				res := handler.ErrorResponse{}
-				err := json.NewDecoder(recoder.Body).Decode(&res)
+				err := json.Unmarshal(body, &res)
 				assert.Equal(t, nil, err)
-				assert.Equal(t, http.StatusInternalServerError, recoder.Code)
+				assert.Equal(t, http.StatusInternalServerError, statusCode)
+				assert.Equal(t, tt.wantErr, res)
+
+			case http.StatusUnauthorized:
+				res := handler.ErrorResponse{}
+				err := json.Unmarshal(body, &res)
+				assert.Equal(t, nil, err)
+
+				assert.Equal(t, http.StatusUnauthorized, statusCode)
 				assert.Equal(t, tt.wantErr, res)
 			default:
-				t.Errorf("unexpected status code: %v", recoder.Code)
+				t.Errorf("unexpected status code: %v", statusCode)
 			}
 		})
 	}
@@ -230,15 +263,18 @@ func TestPostInvoice(t *testing.T) {
 
 func TestGetInvoices(t *testing.T) {
 	seed := setUpGetInvoices(t)
+	tk, _ := getToken(seed.users["user1"].UserId)
 	tests := []struct {
 		name    string
-		req     func() handler.GetInvoicesParams
+		token   string
+		req     func() map[string]string
 		want    func() handler.GetInvoicesResponse
 		wantErr handler.ErrorResponse
 	}{
 		{
-			name: "何もパラメータを指定せず送った場合",
-			req:  func() handler.GetInvoicesParams { return handler.GetInvoicesParams{} },
+			name:  "何もパラメータを指定せず送った場合",
+			token: tk,
+			req:   func() map[string]string { return nil },
 			want: func() handler.GetInvoicesResponse {
 				responses := make([]handler.InvoiceListResponse, 0, len(seed.invoices))
 				for _, invoice := range seed.invoices {
@@ -273,11 +309,12 @@ func TestGetInvoices(t *testing.T) {
 			wantErr: handler.ErrorResponse{},
 		},
 		{
-			name: "1ヶ月先からの請求データを確認した場合",
-			req: func() handler.GetInvoicesParams {
+			name:  "1ヶ月先からの請求データを確認した場合",
+			token: tk,
+			req: func() map[string]string {
 				dueFrom := time.Now().AddDate(0, 1, 0).Format("2006-01-02")
-				return handler.GetInvoicesParams{
-					DueFrom: &dueFrom,
+				return map[string]string{
+					"dueFrom": dueFrom,
 				}
 			},
 			want: func() handler.GetInvoicesResponse {
@@ -315,11 +352,12 @@ func TestGetInvoices(t *testing.T) {
 			wantErr: handler.ErrorResponse{},
 		},
 		{
-			name: "3ヶ月先からの請求データを確認した場合",
-			req: func() handler.GetInvoicesParams {
+			name:  "3ヶ月先からの請求データを確認した場合",
+			token: tk,
+			req: func() map[string]string {
 				dueFrom := time.Now().AddDate(0, 3, 0).Format("2006-01-02")
-				return handler.GetInvoicesParams{
-					DueFrom: &dueFrom,
+				return map[string]string{
+					"dueFrom": dueFrom,
 				}
 			},
 			want: func() handler.GetInvoicesResponse {
@@ -357,13 +395,14 @@ func TestGetInvoices(t *testing.T) {
 			wantErr: handler.ErrorResponse{},
 		},
 		{
-			name: "現在から3日以内の請求データを確認した場合",
-			req: func() handler.GetInvoicesParams {
+			name:  "現在から3日以内の請求データを確認した場合",
+			token: tk,
+			req: func() map[string]string {
 				dueFrom := time.Now().Format("2006-01-02")
 				dueTo := time.Now().AddDate(0, 0, 3).Format("2006-01-02")
-				return handler.GetInvoicesParams{
-					DueFrom: &dueFrom,
-					DueTo:   &dueTo,
+				return map[string]string{
+					"dueFrom": dueFrom,
+					"dueTo":   dueTo,
 				}
 			},
 			want: func() handler.GetInvoicesResponse {
@@ -400,6 +439,21 @@ func TestGetInvoices(t *testing.T) {
 			},
 			wantErr: handler.ErrorResponse{},
 		},
+		{
+			name:  "トークンが無効な場合",
+			token: "abcdefg",
+			req: func() map[string]string {
+				dueFrom := time.Now().Format("2006-01-02")
+				dueTo := time.Now().AddDate(0, 0, 3).Format("2006-01-02")
+				return map[string]string{
+					"dueFrom": dueFrom,
+					"dueTo":   dueTo,
+				}
+			},
+			wantErr: handler.ErrorResponse{
+				Message: auth.ErrorTokenVerification.Error(),
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt
@@ -407,28 +461,38 @@ func TestGetInvoices(t *testing.T) {
 			t.Parallel()
 
 			req := tt.req()
-			usr := handler.User{UserId: seed.users["user1"].UserId}
-			ctx, server, recoder := initServer("/api/invoices", req, usr)
-			_ = server.GetInvoices(ctx, req)
+			body, statusCode, err := getRequest("/api/invoices", "GET", req, tt.token)
+			assert.Equal(t, err, nil)
 
-			switch recoder.Code {
+			switch statusCode {
 			case http.StatusOK:
 				res := handler.GetInvoicesResponse{}
-				err := json.NewDecoder(recoder.Body).Decode(&res)
 				want := tt.want()
+				err := json.Unmarshal(body, &res)
+				assert.Equal(t, nil, err)
 
 				assert.Equal(t, nil, err)
-				assert.Equal(t, http.StatusOK, recoder.Code)
+				assert.Equal(t, http.StatusOK, statusCode)
 				assert.ElementsMatch(t, want.List, res.List)
 
 			case http.StatusInternalServerError:
 				res := handler.ErrorResponse{}
-				err := json.NewDecoder(recoder.Body).Decode(&res)
+				err := json.Unmarshal(body, &res)
 				assert.Equal(t, nil, err)
-				assert.Equal(t, http.StatusInternalServerError, recoder.Code)
+
+				assert.Equal(t, nil, err)
+				assert.Equal(t, http.StatusInternalServerError, statusCode)
+				assert.Equal(t, tt.wantErr, res)
+
+			case http.StatusUnauthorized:
+				res := handler.ErrorResponse{}
+				err := json.Unmarshal(body, &res)
+				assert.Equal(t, nil, err)
+
+				assert.Equal(t, http.StatusUnauthorized, statusCode)
 				assert.Equal(t, tt.wantErr, res)
 			default:
-				t.Errorf("unexpected status code: %v", recoder.Code)
+				t.Errorf("unexpected status code: %v", statusCode)
 			}
 		})
 	}

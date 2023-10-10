@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
+	"net/url"
 	"os"
 	"strconv"
 	"testing"
+	"time"
+	"upsidr-coding-test/internal/auth"
 	"upsidr-coding-test/internal/payment/handler"
 	"upsidr-coding-test/internal/rdb"
 
@@ -19,11 +22,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var e *echo.Echo
+var (
+	e        *echo.Echo
+	testPort = "81"
+)
 
 func TestMain(m *testing.M) {
 	setUp()
+	go func() {
+		e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", testPort)))
+	}()
 	defer tearDown()
+	time.Sleep(1 * time.Second)
 
 	code := m.Run()
 
@@ -38,9 +48,10 @@ func setUp() {
 	e.Debug = isDebugMode
 	e.Logger.SetLevel(log.INFO)
 	e.Use(middleware.Recover())
+	e.Use(handler.UserMiddleware(handler.Fetcher{}))
 
 	if err := rdb.Init(
-		true,
+		false,
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASS"),
 		os.Getenv("DB_HOST"),
@@ -49,6 +60,8 @@ func setUp() {
 	); err != nil {
 		e.Logger.Fatal(err)
 	}
+	s := handler.Server{}
+	handler.RegisterHandlers(e, s)
 }
 
 func tearDown() {
@@ -84,20 +97,83 @@ func truncateAllTables() error {
 	return nil
 }
 
-func initServer(url string, r any, user handler.User) (echo.Context, handler.Server, *httptest.ResponseRecorder) {
-	req := httptest.NewRequest(http.MethodPost, url, toIoReader(r))
+func postRequest(link, method string, r any, token string) ([]byte, int, error) {
+	reader, err := toIoReader(r)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	req, err := http.NewRequest(method, fmt.Sprintf("http://localhost:%s%s", testPort, link), reader)
+	if err != nil {
+		return nil, 0, err
+	}
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.Set("user", user)
-	s := handler.Server{}
-	return c, s, rec
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return body, res.StatusCode, nil
 }
 
-func toIoReader(r any) io.Reader {
+func getRequest(link, method string, params map[string]string, token string) ([]byte, int, error) {
+	u, err := url.Parse(fmt.Sprintf("http://localhost:%s%s", testPort, link))
+	if err != nil {
+		return nil, 0, err
+	}
+
+	q := u.Query()
+	for k, v := range params {
+		q.Set(k, v)
+	}
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequest(method, u.String(), nil)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return body, res.StatusCode, nil
+}
+
+func toIoReader(r any) (io.Reader, error) {
 	b, err := json.Marshal(r)
 	if err != nil {
-		e.Logger.Error(err)
+		return nil, err
 	}
-	return bytes.NewBuffer(b)
+	return bytes.NewBuffer(b), nil
+}
+
+func hashPassword(rawPass string) (string, error) {
+	handler := auth.NewHandler(e.Logger)
+	return handler.HashPassword(rawPass)
+}
+
+func getToken(uid string) (string, error) {
+	handler := auth.NewHandler(e.Logger)
+	return handler.CreateToken(uid)
 }
