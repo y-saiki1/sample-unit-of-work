@@ -39,11 +39,11 @@ func (w *ServerInterfaceWrapper) GetInvoices(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter dueFrom: %s", err))
 	}
 
-	// ------------- Optional query parameter "DueTo" -------------
+	// ------------- Optional query parameter "dueTo" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "DueTo", ctx.QueryParams(), &params.DueTo)
+	err = runtime.BindQueryParameter("form", true, false, "dueTo", ctx.QueryParams(), &params.DueTo)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter DueTo: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter dueTo: %s", err))
 	}
 
 	// ------------- Optional query parameter "page" -------------

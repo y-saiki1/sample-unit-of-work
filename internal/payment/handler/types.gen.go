@@ -18,6 +18,11 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// Error implements error.
+func (ErrorResponse) Error() string {
+	panic("unimplemented")
+}
+
 // GetInvoicesResponse defines model for GetInvoicesResponse.
 type GetInvoicesResponse struct {
 	List []InvoiceListResponse `json:"list"`
@@ -93,7 +98,7 @@ type GetInvoicesParams struct {
 	DueFrom *string `form:"dueFrom,omitempty" json:"dueFrom,omitempty"`
 
 	// DueTo 取得する請求書の終了日時
-	DueTo *string `form:"DueTo,omitempty" json:"DueTo,omitempty"`
+	DueTo *string `form:"dueTo,omitempty" json:"dueTo,omitempty"`
 
 	// Page ページ
 	Page *int `form:"page,omitempty" json:"page,omitempty"`
