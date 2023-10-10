@@ -12,4 +12,5 @@ var (
 	ErrorClientIdEmpty         error = errors.New("client ID must not be an empty string.")
 	ErrorInvoiceIdEmpty        error = errors.New("invoice ID must not be an empty string.")
 	ErrorInvoiceStatusInvalid  error = errors.New("provided invoice status is invalid.")
+	ErrorUserNameEmpty         error = errors.New("user name must not be an empty string.")
 )

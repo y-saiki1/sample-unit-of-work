@@ -18,6 +18,6 @@ type Invoice struct {
 	DeletedAt     *time.Time `json:"deleted_at"`
 
 	// relation
-	Client     Company            `json:"company" gorm:"reference:CompanyId"`
+	Client     *Company           `json:"company" gorm:"foreignKey:ClientId;references:CompanyId"`
 	StatusLogs []InvoiceStatusLog `json:"statuses" gorm:"reference:InvoiceId"`
 }

@@ -160,7 +160,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvoiceListResponse'
-      
     InvoiceListResponse:
       type: object
       required:
@@ -176,6 +175,8 @@ components:
         - invoiceAmount
         - updatedAt
         - deletedAt
+        - client
+        - statusLogs
       properties:
         invoiceId:
           type: string
@@ -213,3 +214,48 @@ components:
         deletedAt:
           type: string
           description: 削除日時
+        client:
+          $ref: '#/components/schemas/Client'
+        statusLogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusLog'
+    Client:
+      type: object
+      required: 
+        - companyId
+        - name
+      properties:
+        companyId:
+          type: string
+          description: 企業ID
+        name:
+          type: string
+          description: クライアント名
+    StatusLog:
+      type: object
+      required: 
+        - userName
+        - status
+        - createdAt
+        - updatedAt
+        - deletedAt
+      properties:
+        userName:
+          type: string
+          description: ステータス変更者名
+        status:
+          type: string
+          description: 現在の状態
+        createdAt:
+          type: string
+          description: 作成日
+        updatedAt:
+          type: string
+          description: 変更日
+        deletedAt:
+          type: string
+          description: 削除日
+
+              
+

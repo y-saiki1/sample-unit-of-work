@@ -34,7 +34,7 @@ VALUES
 
 -- invoices
 INSERT INTO 
-    invoices (invoice_id, company_id, client_id, payment_amount, fee, fee_rate, tax, tax_rate, total_amount, due_at, created_at, updated_at) 
+    invoices (invoice_id, company_id, client_id, payment_amount, fee, fee_rate, tax, tax_rate, invoice_amount, due_at, created_at, updated_at) 
 VALUES 
     ('invoice1', 'company1', 'company2', 1000, 0.04, 40, 0.10, 4, 1044, NOW() + INTERVAL 7 DAY, NOW(), NOW()),
     ('invoice2', 'company2', 'company3', 1500, 0.04, 60, 0.10, 6, 1566, NOW() + INTERVAL 10 DAY, NOW(), NOW()),

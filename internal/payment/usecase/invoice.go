@@ -49,7 +49,7 @@ func (u *InvoiceUseCase) Create(dto InvoiceCreateDTO) (domain.Invoice, error) {
 
 	issueD := time.Now()
 	issueD = time.Date(issueD.Year(), issueD.Month(), issueD.Day(), 0, 0, 0, 0, time.Local)
-	invoice, err := domain.NewInvoice(issueD, dto.DueAt, uuid.NewString(), usr.CompanyId.Value(), dto.ClientId, dto.PaymentAmount)
+	invoice, err := domain.NewInvoice(issueD, dto.DueAt, uuid.NewString(), usr.CompanyId.Value(), usr.UserId.Value(), usr.Name.Value(), dto.ClientId, dto.PaymentAmount)
 	if err != nil {
 		return domain.Invoice{}, err
 	}
