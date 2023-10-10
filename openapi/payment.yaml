@@ -27,6 +27,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認可エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: サーバーエラー
           content:
@@ -44,7 +50,7 @@ paths:
           required: false
           schema:
             type: string
-        - name: DueTo
+        - name: dueTo
           in: query
           description: 取得する請求書の終了日時
           required: false
